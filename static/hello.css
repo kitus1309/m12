@@ -1,0 +1,26 @@
+body {
+    background-color: black;
+    color:aquamarine;
+    margin: 10px;
+    padding: 20px 20px 20px;
+    display:flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+
+
+h1 {
+    text-align: center;
+    margin: 0;
+    padding: 20px 0;
+    color: rgb(212, 142, 142);
+    text-shadow: 3px 3px 1px red;
+    border: 10px solid red;
+}
+
+img {
+    margin-top: 10px;
+    display: block;
+    width: 60%;    
+}
