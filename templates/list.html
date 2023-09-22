@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Productos</title>
+</head>
+<body>
+    <h1>Lista de Productos</h1>
+    <table>
+        <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Foto</th>
+            <th>Precio</th>
+        </tr>
+        {% for product in products %}
+        <tr>
+            <td>{{ product[0] }}</td>
+            <td>{{ product [1] }}</td>
+            <td><img src="{{ product[2] }}" alt="Foto del producto" width="100">{{ product[2] }}</td>
+            <td>{{ product [3] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
