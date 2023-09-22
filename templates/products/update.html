@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Producto</title>
+</head>
+</head>
+<body>
+    <h1>Actualizar Producto</h1>
+    <form method="POST" action="/products/update/{{ product[0] }}">
+        <label for="title">Título:</label>
+        <input type="text" id="title" name="title" value="{{ product[1] }}" required><br><br>
+
+        <label for="description">Descripción:</label>
+        <input type="text" id="description" name="description" value="{{ product[2] }}" required><br><br>
+
+        <label for="photo">Foto:</label>
+        <input type="text" id="photo" name="photo" value="{{ product[3] }}" required><br><br>
+
+        <label for="price">Precio:</label>
+        <input type="text" id="price" name="price" value="{{ product[4] }}" required><br><br>
+
+        <input type="submit" value="Actualizar">
+    </form>
+</body>
+</html>
+
+
+
+
+
+
+

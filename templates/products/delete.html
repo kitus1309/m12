@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Producto</title>
+</head>
+</head>
+<body>
+    <h1>Eliminar Producto</h1>
+    <p>¿Está seguro de que desea eliminar el siguiente producto?</p>
+    <p><strong>ID:</strong> {{ product[0] }}</p>
+    <p><strong>Título:</strong> {{ product[1] }}</p>
+    <p><strong>Descripción:</strong> {{ product[2] }}</p>
+    <p><strong>Foto:</strong> {{ product[3] }}</p>
+    <p><strong>Precio:</strong> {{ product[4] }}</p>
+    <form method="POST" action="/products/delete/{{ product[0] }}">
+        <input type="submit" value="Eliminar">
+    </form>
+    <a href="/products">Cancelar</a>
+</body>
+</html>
+
+
+
+
+
