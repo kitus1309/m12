@@ -36,4 +36,4 @@ def get_product_list():
 @app.route('/products/list')
 def list_products():
     products = get_product_list()
-    return render_template('list.html', products=products)
+    return render_template('/products/list.html', products=products)
