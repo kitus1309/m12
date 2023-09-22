@@ -89,14 +89,36 @@ def update_product(id):
         flash('Producto actualizado exitosamente', 'success')
         return redirect('/products/list')
 
-@app.route('/products/delete/<int:id>', methods=['GET'])
-def delete_product(id):
+@app.route('/products/delete/<int:id>/confirm', methods=['GET'])
+def show_delete_confirmation(id):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute('DELETE FROM products WHERE id = ?', (id,))
-    conn.commit()
+    cursor.execute('SELECT * FROM products WHERE id = ?', (id,))
+    product = cursor.fetchone()
     conn.close()
-    flash('Producto eliminado exitosamente', 'success')
-    return redirect('/products/list')
+    return render_template('delete_confirm.html', product=product)
+
+@app.route('/products/delete/<int:id>', methods=['POST'])
+def delete_product(id):
+    if request.method == 'POST':
+        # Eliminar el registro de la base de datos
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM products WHERE id = ?', (id,))
+        conn.commit()
+        conn.close()
+        flash('Producto eliminado exitosamente', 'success')
+        return redirect('/products/list')
+
+@app.route('/products/list', methods=['GET'])
+def list_products():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM products')
+    products = cursor.fetchall()
+    conn.close()
+    return render_template('list.html', products=products)
+
+
 
 
