@@ -37,3 +37,66 @@ def get_product_list():
 def list_products():
     products = get_product_list()
     return render_template('/products/list.html', products=products)
+
+@app.route('/products/create', methods=['GET'])
+def show_create_form():
+    return render_template('create.html')
+
+@app.route('/products/create', methods=['POST'])
+def create_product():
+    if request.method == 'POST':
+        # Obtener los datos del formulario
+        title = request.form['title']
+        description = request.form['description']
+        photo = request.form['photo']
+        price = request.form['price']
+
+        # Insertar los datos en la base de datos
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO products (title, description, photo, price) VALUES (?, ?, ?, ?)",
+                       (title, description, photo, price))
+        conn.commit()
+        conn.close()
+        flash('Producto creado exitosamente', 'success')
+        return redirect('/products/list')
+    
+@app.route('/products/update/<int:id>/edit', methods=['GET'])
+def show_update_form(id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM products WHERE id = ?', (id,))
+    product = cursor.fetchone()
+    conn.close()
+    return render_template('update.html', product=product)
+
+@app.route('/products/update/<int:id>', methods=['POST'])
+def update_product(id):
+    if request.method == 'POST':
+        # Obtener los datos del formulario
+        title = request.form['title']
+        description = request.form['description']
+        photo = request.form['photo']
+        price = request.form['price']
+
+        # Actualizar los datos en la base de datos
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE products SET title=?, description=?, photo=?, price=? WHERE id=?",
+                       (title, description, photo, price, id))
+        conn.commit()
+        conn.close()
+        flash('Producto actualizado exitosamente', 'success')
+        return redirect('/products/list')
+
+@app.route('/products/delete/<int:id>', methods=['GET'])
+def delete_product(id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM products WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    flash('Producto eliminado exitosamente', 'success')
+    return redirect('/products/list')
+
+
