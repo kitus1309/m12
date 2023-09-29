@@ -1,13 +1,13 @@
 #!/usr/bin/python
 
-from flask import Flask, request, redirect, url_for
-from flask import render_template
-import sqlite3
-from flask import g
-import datetime
+from flask import Flask, request, redirect, url_for, g, render_template
+import sqlite3, os, datetime
+from werkzeug.utils import secure_filename
 
+UPLOAD_FOLDER = 'uploads'
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 DATABASE = './database.db'
 
@@ -58,16 +58,23 @@ def create_product():
             return "Tipo de archivo no permitido", 400
         if photo.content_length > 2 * 1024 * 1024:
             return "La foto no puede superar los 2MB", 400
+        if photo and allowed_file(photo.filename):
+            filename = secure_filename(photo.filename)
+            photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            #return redirect(url_for('download_file', name=filename))
 
-        # Obtener la fecha y hora actual en el formato 'Y-m-d H:i:s'
-        current_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            # Obtener la fecha y hora actual en el formato 'Y-m-d H:i:s'
+            current_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO products (title, description, photo, price, category_id, seller_id, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (title, description, photo.filename, price, category_id, seller_id, current_datetime, current_datetime))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('list_products'))  # Redirige a la lista de productos después de la creación
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO products (title, description, photo, price, category_id, seller_id, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (title, description, photo.filename, price, category_id, seller_id, current_datetime, current_datetime))
+            conn.commit()
+            conn.close()
+            return redirect(url_for('list_products'))  # Redirige a la lista de productos después de la creación
+        else:
+            #TODO fitxer invalid
+            return redirect(url_for('create_product'))  # Redirige al form
     else:
         # Obtener las categorías desde la base de datos
         conn = get_db()
