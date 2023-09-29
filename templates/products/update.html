@@ -8,18 +8,31 @@
 </head>
 <body>
     <h1>Actualizar Producto</h1>
-    <form method="POST" action="/products/update/{{ product[0] }}">
+    <form method="POST" action="/products/update/{{ product[0] }}" enctype="multipart/form-data">
         <label for="title">Título:</label>
-        <input type="text" id="title" name="title" value="{{ product[1] }}" required><br><br>
+        <input type="text" id="title" name="title" value="{{ product[1] }}" required maxlength="255"><br><br>
 
         <label for="description">Descripción:</label>
         <input type="text" id="description" name="description" value="{{ product[2] }}" required><br><br>
 
-        <label for="photo">Foto:</label>
-        <input type="text" id="photo" name="photo" value="{{ product[3] }}" required><br><br>
+        <label for="photo">Foto (max 2MB):</label>
+        <input type="file" id="photo" name="photo" accept=".jpg, .jpeg, .png"><br><br>
 
         <label for="price">Precio:</label>
-        <input type="text" id="price" name="price" value="{{ product[4] }}" required><br><br>
+        <input type="number" id="price" name="price" value="{{ product[4] }}" required><br><br>
+
+        <!-- Mantener el seller_id y el created originales -->
+        <input type="hidden" name="seller_id" value="{{ product[5] }}">
+        <input type="hidden" name="created" value="{{ product[6] }}">
+
+        <input type="hidden" name="updated" value="{{ product[7] }}">
+
+        <label for="category_id">Categoría:</label>
+        <select id="category_id" name="category_id" required>
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if category.id == product[3] %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+        </select><br><br>
 
         <input type="submit" value="Actualizar">
     </form>

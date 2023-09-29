@@ -5,22 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Creación de Productos</title>
 </head>
-</head>
 <body>
     <h1>Crear Producto</h1>
-    <form method="POST" action="/products/create">
+    <form method="POST" action="/products/create" enctype="multipart/form-data">
         <label for="title">Título:</label>
-        <input type="text" id="title" name="title" required><br><br>
+        <input type="text" id="title" name="title" required maxlength="255"><br><br>
         
         <label for="description">Descripción:</label>
         <input type="text" id="description" name="description" required><br><br>
-        
-        <label for="photo">Foto:</label>
-        <input type="text" id="photo" name="photo" required><br><br>
+        <label for="photo">Foto (max 2MB):</label>
+        <input type="file" id="photo" name="photo" accept=".jpg, .jpeg, .png" required><br><br>
         
         <label for="price">Precio:</label>
-        <input type="text" id="price" name="price" required><br><br>
+        <input type="number" id="price" name="price" required><br><br>
         
+        <label for="category_id">Categoría:</label>
+        <select id="category_id" name="category_id">
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select><br><br>
         <input type="submit" value="Crear">
     </form>
 </body>

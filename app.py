@@ -4,6 +4,8 @@ from flask import Flask, request, redirect, url_for
 from flask import render_template
 import sqlite3
 from flask import g
+import datetime
+
 
 app = Flask(__name__)
 
@@ -13,6 +15,7 @@ def get_db():
     db = getattr(g, '_database', None)
     if db is None:
         db = g._database = sqlite3.connect(DATABASE)
+        db.row_factory = sqlite3.Row
     return db
 
 @app.teardown_appcontext
@@ -43,18 +46,36 @@ def create_product():
     if request.method == 'POST':
         title = request.form['title']
         description = request.form['description']
-        photo = request.form['photo']
         price = request.form['price']
+        category_id = request.form['category_id']
+        seller_id = "1"
         
+        # Validación de la foto
+        photo = request.files['photo']
+        if not photo or photo.filename == '':
+            return "La foto es obligatoria", 400
+        if not allowed_file(photo.filename):
+            return "Tipo de archivo no permitido", 400
+        if photo.content_length > 2 * 1024 * 1024:
+            return "La foto no puede superar los 2MB", 400
+
+        # Obtener la fecha y hora actual en el formato 'Y-m-d H:i:s'
+        current_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO products (title, description, photo, price) VALUES (?, ?, ?, ?)", (title, description, photo, price))
+        cursor.execute("INSERT INTO products (title, description, photo, price, category_id, seller_id, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (title, description, photo.filename, price, category_id, seller_id, current_datetime, current_datetime))
         conn.commit()
         conn.close()
-        
         return redirect(url_for('list_products'))  # Redirige a la lista de productos después de la creación
     else:
-        return render_template('/products/create.html')
+        # Obtener las categorías desde la base de datos
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, name FROM categories')
+        categories = cursor.fetchall()
+        conn.close()
+        return render_template('/products/create.html', categories=categories)
 
 @app.route("/products/read/<int:id>")
 def read_product(id):
@@ -83,17 +104,35 @@ def update_product(id):
     if request.method == 'POST':
         title = request.form['title']
         description = request.form['description']
-        photo = request.form['photo']
         price = request.form['price']
+        category_id = request.form['category_id']
+        seller_id = product[5]  # Mantenemos el seller_id original
+        created = product[6]    # Mantenemos el created original
 
-        cursor.execute("UPDATE products SET title=?, description=?, photo=?, price=? WHERE id=?", (title, description, photo, price, id))
+        # Validación de la foto
+        photo = request.files['photo']
+        if photo and photo.filename:
+            if not allowed_file(photo.filename):
+                conn.close()
+                return "Tipo de archivo no permitido", 400
+            if photo.content_length > 2 * 1024 * 1024:
+                conn.close()
+                return "La foto no puede superar los 2MB", 400
+
+        # Actualizamos el updated con la fecha y hora actual en el formato 'Y-m-d H:i:s'
+        updated = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        cursor.execute("UPDATE products SET title=?, description=?, photo=?, price=?, category_id=?, seller_id=?, created=?, updated=? WHERE id=?", (title, description, photo.filename, price, category_id, seller_id, created, updated, id))
         conn.commit()
         conn.close()
 
         return redirect(url_for('list_products'))  # Redirige a la lista de productos después de la actualización
     else:
+        # Obtener las categorías desde la base de datos
+        cursor.execute('SELECT id, name FROM categories')
+        categories = cursor.fetchall()
         conn.close()
-        return render_template('/products/update.html', product=product)
+        return render_template('/products/update.html', product=product, categories=categories)
 
 @app.route("/products/delete/<int:id>", methods=['GET', 'POST'])
 def delete_product(id):
@@ -116,5 +155,9 @@ def delete_product(id):
         conn.close()
         return render_template('/products/delete.html', product=product)
 
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
