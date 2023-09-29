@@ -73,7 +73,6 @@ def create_product():
             conn.close()
             return redirect(url_for('list_products'))  # Redirige a la lista de productos después de la creación
         else:
-            #TODO fitxer invalid
             return redirect(url_for('create_product'))  # Redirige al form
     else:
         # Obtener las categorías desde la base de datos
@@ -125,15 +124,23 @@ def update_product(id):
             if photo.content_length > 2 * 1024 * 1024:
                 conn.close()
                 return "La foto no puede superar los 2MB", 400
+        
+        if photo and allowed_file(photo.filename):
+            filename = secure_filename(photo.filename)
+            photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            #return redirect(url_for('download_file', name=filename))
+        
+            # Actualizamos el updated con la fecha y hora actual en el formato 'Y-m-d H:i:s'
+            updated = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        # Actualizamos el updated con la fecha y hora actual en el formato 'Y-m-d H:i:s'
-        updated = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            cursor.execute("UPDATE products SET title=?, description=?, photo=?, price=?, category_id=?, seller_id=?, created=?, updated=? WHERE id=?", (title, description, photo.filename, price, category_id, seller_id, created, updated, id))
+            conn.commit()
+            conn.close()
 
-        cursor.execute("UPDATE products SET title=?, description=?, photo=?, price=?, category_id=?, seller_id=?, created=?, updated=? WHERE id=?", (title, description, photo.filename, price, category_id, seller_id, created, updated, id))
-        conn.commit()
-        conn.close()
+            return redirect(url_for('list_products'))  # Redirige a la lista de productos después de la actualización
+        else:
+            return redirect(url_for('update_product'))  # Redirige al form
 
-        return redirect(url_for('list_products'))  # Redirige a la lista de productos después de la actualización
     else:
         # Obtener las categorías desde la base de datos
         cursor.execute('SELECT id, name FROM categories')
