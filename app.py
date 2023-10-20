@@ -1,13 +1,13 @@
 #!/usr/bin/python
 
-from flask import Flask, request, redirect, url_for, g, render_template
-import sqlite3, os, datetime
-from werkzeug.utils import secure_filename
+from flask import Flask, request, redirect, url_for
+from flask import render_template
+import sqlite3
+from flask import g
+import datetime
 
-UPLOAD_FOLDER = 'uploads'
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 DATABASE = './database.db'
 
@@ -31,7 +31,7 @@ def hello():
 def get_product_list():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT id,title, description, photo, price FROM products')
+    cursor.execute('SELECT title, description, photo, price FROM products')
     products = cursor.fetchall()
     conn.close()
     return products
@@ -47,6 +47,7 @@ def create_product():
         title = request.form['title']
         description = request.form['description']
         price = request.form['price']
+        category_id = request.form['category_id']
         seller_id = "1"
         
         # Validación de la foto
@@ -57,22 +58,16 @@ def create_product():
             return "Tipo de archivo no permitido", 400
         if photo.content_length > 2 * 1024 * 1024:
             return "La foto no puede superar los 2MB", 400
-        if photo and allowed_file(photo.filename):
-            filename = secure_filename(photo.filename)
-            photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            #return redirect(url_for('download_file', name=filename))
 
-            # Obtener la fecha y hora actual en el formato 'Y-m-d H:i:s'
-            current_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # Obtener la fecha y hora actual en el formato 'Y-m-d H:i:s'
+        current_datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO products (title, description, photo, price, seller_id, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?)", (title, description, photo.filename, price, seller_id, current_datetime, current_datetime))
-            conn.commit()
-            conn.close()
-            return redirect(url_for('list_products'))  # Redirige a la lista de productos después de la creación
-        else:
-            return redirect(url_for('create_product'))  # Redirige al form
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO products (title, description, photo, price, category_id, seller_id, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (title, description, photo.filename, price, category_id, seller_id, current_datetime, current_datetime))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('list_products'))  # Redirige a la lista de productos después de la creación
     else:
         # Obtener las categorías desde la base de datos
         conn = get_db()
@@ -81,7 +76,7 @@ def create_product():
         categories = cursor.fetchall()
         conn.close()
         return render_template('/products/create.html', categories=categories)
-    
+
 @app.route("/products/read/<int:id>")
 def read_product(id):
     conn = get_db()
@@ -123,23 +118,15 @@ def update_product(id):
             if photo.content_length > 2 * 1024 * 1024:
                 conn.close()
                 return "La foto no puede superar los 2MB", 400
-        
-        if photo and allowed_file(photo.filename):
-            filename = secure_filename(photo.filename)
-            photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            #return redirect(url_for('download_file', name=filename))
-        
-            # Actualizamos el updated con la fecha y hora actual en el formato 'Y-m-d H:i:s'
-            updated = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-            cursor.execute("UPDATE products SET title=?, description=?, photo=?, price=?, category_id=?, seller_id=?, created=?, updated=? WHERE id=?", (title, description, photo.filename, price, category_id, seller_id, created, updated, id))
-            conn.commit()
-            conn.close()
+        # Actualizamos el updated con la fecha y hora actual en el formato 'Y-m-d H:i:s'
+        updated = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-            return redirect(url_for('list_products'))  # Redirige a la lista de productos después de la actualización
-        else:
-            return redirect(url_for('update_product'))  # Redirige al form
+        cursor.execute("UPDATE products SET title=?, description=?, photo=?, price=?, category_id=?, seller_id=?, created=?, updated=? WHERE id=?", (title, description, photo.filename, price, category_id, seller_id, created, updated, id))
+        conn.commit()
+        conn.close()
 
+        return redirect(url_for('list_products'))  # Redirige a la lista de productos después de la actualización
     else:
         # Obtener las categorías desde la base de datos
         cursor.execute('SELECT id, name FROM categories')
@@ -172,5 +159,3 @@ ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
