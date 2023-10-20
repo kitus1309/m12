@@ -9,6 +9,7 @@
     <h1>Lista de Productos</h1>
     <table>
         <tr>
+            <th>ID</th>
             <th>Nombre</th>
             <th>Descripción</th>
             <th>Foto</th>
@@ -17,11 +18,21 @@
         {% for product in products %}
         <tr>
             <td>{{ product[0] }}</td>
-            <td>{{ product [1] }}</td>
-            <td><img src="{{ product[2] }}" alt="Foto del producto" width="100">{{ product[2] }}</td>
-            <td>{{ product [3] }}</td>
+            <td>{{ product[1] }}</td>
+            <td>{{ product [2] }}</td>
+            <td><img src="{{ product[3] }}" width="100">{{ product[3] }}</td>
+            <td>{{ product [4] }}</td>
         </tr>
         {% endfor %}
     </table>
+    <br><br>
+    <a href="/products/create">[ - Crear producte - ]</a>
+    <br><br>
+    <a href="/products/update/1">[ - Modificar producte - ] - (Modifica el numero de la url amb la id correcta, segons el producte que vulguis modificar)</a>
+    <br><br>
+    <a href="/products/delete/1">[ - Eliminar producte - ] - (Modifica el numero de la url amb la id correcta, segons el producte que vulguis eliminar)</a>
+    <br><br>
+    <a href="/products/read/1">[ - Llegir producte - ] - (Modifica el numero de la url amb la id correcta, segons el producte que vulguis llegir)</a>
+    
 </body>
 </html>

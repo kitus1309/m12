@@ -31,7 +31,7 @@ def hello():
 def get_product_list():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT title, description, photo, price FROM products')
+    cursor.execute('SELECT id,title, description, photo, price FROM products')
     products = cursor.fetchall()
     conn.close()
     return products
@@ -47,7 +47,6 @@ def create_product():
         title = request.form['title']
         description = request.form['description']
         price = request.form['price']
-        category_id = request.form['category_id']
         seller_id = "1"
         
         # Validación de la foto
@@ -68,7 +67,7 @@ def create_product():
 
             conn = get_db()
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO products (title, description, photo, price, category_id, seller_id, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (title, description, photo.filename, price, category_id, seller_id, current_datetime, current_datetime))
+            cursor.execute("INSERT INTO products (title, description, photo, price, seller_id, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?)", (title, description, photo.filename, price, seller_id, current_datetime, current_datetime))
             conn.commit()
             conn.close()
             return redirect(url_for('list_products'))  # Redirige a la lista de productos después de la creación
@@ -82,7 +81,7 @@ def create_product():
         categories = cursor.fetchall()
         conn.close()
         return render_template('/products/create.html', categories=categories)
-
+    
 @app.route("/products/read/<int:id>")
 def read_product(id):
     conn = get_db()

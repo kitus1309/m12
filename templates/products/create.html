@@ -19,13 +19,11 @@
         <label for="price">Precio:</label>
         <input type="number" id="price" name="price" required><br><br>
         
-        <label for="category_id">Categoría:</label>
-        <select id="category_id" name="category_id">
-            {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
-            {% endfor %}
         </select><br><br>
+
         <input type="submit" value="Crear">
+        <br><br>
+        <a href="/products/list">[ - Cancelar - ]</a>
     </form>
 </body>
 </html>
